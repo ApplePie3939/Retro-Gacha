@@ -148,6 +148,11 @@ try {
         ],
     ];
 
+    $qr_dir = __DIR__ . '/images/qrcodes';
+    if (!file_exists($qr_dir)) {
+        mkdir($qr_dir, 0777, true);
+    }
+
     $stmt = $pdo->prepare("
         INSERT INTO shops (name, genre, image, description, address)
         VALUES (:name, :genre, :image, :description, :address)
@@ -155,6 +160,20 @@ try {
 
     foreach ($shops as $shop) {
         $stmt->execute($shop);
+        $shop_id = $pdo->lastInsertId();
+
+        // QRコード生成して保存 (QRServer APIを使用)
+        $qr_data = json_encode(['shop_id' => (int)$shop_id]);
+        $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data=" . urlencode($qr_data);
+        
+        // 外部APIを叩いて画像を保存
+        $qr_image = @file_get_contents($qr_url);
+        if ($qr_image !== false) {
+            file_put_contents($qr_dir . "/shop_{$shop_id}.png", $qr_image);
+            echo "店舗「{$shop['name']}」の店舗データとQRコード画像を生成しました。\n";
+        } else {
+            echo "店舗「{$shop['name']}」のQRコード画像生成に失敗しました（外部APIエラー）。\n";
+        }
     }
     echo count($shops) . "件の店舗データを投入しました\n";
 
