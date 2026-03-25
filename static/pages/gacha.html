@@ -149,12 +149,15 @@
         <h1>🎰 古町ガチャ</h1>
         <div class="user-info">
             <span id="usernameDisplay">---</span>
+            <span id="coinsDisplay" style="color:#f5a623; font-weight:bold;">💰 ---</span>
             <button id="logoutBtn">ログアウト</button>
         </div>
     </div>
 
     <!-- メインコンテンツ -->
     <div class="main">
+        <a href="qr.html" style="display:inline-block; margin-bottom: 30px; padding: 14px 28px; background: #28a745; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(40,167,69,0.3); transition: transform 0.2s;">📷 QRコードでコインGET</a>
+
         <button class="gacha-btn" id="gachaBtn">🎰<br>ガチャを回す！</button>
 
         <!-- 結果表示エリア -->
@@ -181,6 +184,7 @@
                     return;
                 }
                 document.getElementById('usernameDisplay').textContent = data.user.username;
+                document.getElementById('coinsDisplay').textContent = `💰 ${data.user.coins}`;
             } catch (err) {
                 window.location.href = 'login.html';
             }

@@ -62,6 +62,18 @@ try {
     ");
     echo "gacha_historyテーブルを作成しました\n";
 
+    // shop_coin_historyテーブル (QRコードスキャンでのコイン獲得履歴)
+    $pdo->exec("
+        CREATE TABLE shop_coin_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            shop_id INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, shop_id)
+        )
+    ");
+    echo "shop_coin_historyテーブルを作成しました\n";
+
     // ===== 店舗データ投入 =====
     $shops = [
         [
