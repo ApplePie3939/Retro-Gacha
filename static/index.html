@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>古町レトロ・ガチャウォーク</title>
     <style>
+        /* レイアウトの数値はそのままに、色と質感のみ変更 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
-            background: #1a1a2e;
-            color: #eee;
+            font-family: "Sawarabi Mincho", "Hiragino Mincho ProN", "serif";
+            /* 和紙のテクスチャとベージュ系背景 */
+            background-color: #f4f1ea;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            color: #333;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -18,28 +21,50 @@
         .container {
             text-align: center;
             padding: 40px;
+            /* 蔵の漆喰をイメージした白背景と二重線 */
+            background: #fff;
+            border: 3px double #8b4513;
+            border-radius: 4px;
+            box-shadow: 8px 8px 0px rgba(139, 69, 19, 0.1);
         }
         h1 {
             font-size: 2rem;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #e94560, #f5a623);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            /* グラデーションを廃止し、渋いえんじ色の一色に */
+            color: #a04040;
+            border-bottom: 2px solid #a04040;
         }
-        p { color: #aaa; margin-bottom: 30px; }
+        p {
+            color: #666; /* 落ち着いたグレー */
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
         .buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
         a {
             display: inline-block;
             padding: 14px 32px;
-            border-radius: 8px;
+            border-radius: 4px; /* 角丸を小さくして古風に */
             text-decoration: none;
             font-size: 1rem;
             font-weight: bold;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        a:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(233,69,96,0.4); }
-        .btn-login { background: #e94560; color: #fff; }
-        .btn-register { background: transparent; color: #e94560; border: 2px solid #e94560; }
+        /* ボタン：ホバー時の影も板画風のズレに変更 */
+        a:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #5d2e0d; }
+
+        /* ログインボタン：えんじ色 */
+        .btn-login {
+            background: #a04040;
+            color: #fff;
+            box-shadow: 4px 4px 0px #5d2e0d;
+        }
+        /* 新規登録ボタン：茶色の枠線 */
+        .btn-register {
+            background: transparent;
+            color: #8b4513;
+            border: 2px solid #8b4513;
+            box-shadow: 4px 4px 0px rgba(139, 69, 19, 0.1);
+        }
     </style>
 </head>
 <body>

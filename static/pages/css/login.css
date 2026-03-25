@@ -1,0 +1,163 @@
+/* 外観・リセット設定  */
+/* 全要素のリセット：余白の初期化とサイズ計算の統一 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 全体の背景設定：和紙のような質感とレイアウトの中央寄せ */
+body {
+    /* 背景：和紙のような質感（薄いベージュ） */
+    background-color: #f4f1ea;
+    background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+    font-family: "Sawarabi Mincho", "Hiragino Mincho ProN", "serif";
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ログインカード本体  */
+/* ログインカード：蔵や古い建物の漆喰をイメージ */
+.card {
+    background: #fff;
+    border: 3px double #8b4513; /* 二重線の縁取りでレトロ感 */
+    border-radius: 4px; /* あえて角丸を小さくして古風に */
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 8px 8px 0px rgba(139, 69, 19, 0.1); /* 影をぼかさずズラす「版画」風 */
+    animation: fadeIn 0.8s ease-out;
+}
+
+/* ヘッダー・タイトル  */
+/* タイトル：看板のような装飾 */
+.brand-logo {
+    text-align: center;
+    margin-bottom: 5px;
+    color: #a04040; /* 渋い「えんじ色」 */
+    font-size: 2rem;
+    border-bottom: 2px solid #a04040;
+    display: inline-block;
+    width: 100%;
+    padding-bottom: 10px;
+}
+
+/* サブタイトル：控えめな補足テキスト */
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+/* フォーム要素  */
+/* フォーム入力欄のグループ間隔 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* 入力項目のラベル */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #444;
+    font-weight: bold;
+}
+
+/* テキスト・パスワード入力フィールド */
+input[type="text"], 
+input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-bottom: 3px solid #8b4513; /* 下線だけ太くしてアクセントに */
+    background: #fafafa;
+    color: #333;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s;
+}
+
+/* 入力フィールド：フォーカス時の挙動 */
+input:focus {
+    background: #fff;
+    border-bottom-color: #a04040;
+}
+
+/* ボタン：千社札や印鑑のようなイメージ */
+.btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: #a04040;
+    color: #fff;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 4px 4px 0px #5d2e0d;
+    margin-top: 10px;
+}
+
+/* ボタン：ホバー（マウスを乗せた際）の沈み込み演出 */
+.btn-submit:hover {
+    background: #803030;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #5d2e0d;
+}
+
+/* 通知・メッセージ  */
+/* メッセージエリアの修正 */
+.message {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    font-size: 0.9rem;
+    /* border: 1px dashed #ccc;  ← これを消すかコメントアウト */
+    display: none; /* 初期状態では完全に非表示にする */
+    border-radius: 4px;
+}
+
+/* エラーや成功時に枠線を出すようにする */
+/* エラーメッセージ：えんじ色の警告色 */
+.message.error {
+    display: block;
+    color: #a04040;
+    background: #fff0f0;
+    border: 1px solid #a04040; /* エラー時だけ枠を出す */
+}
+
+/* 成功メッセージ：常盤色（緑系）の成功色 */
+.message.success {
+    display: block;
+    color: #2e5a2e;
+    background: #f0fff0;
+    border: 1px solid #2e5a2e; /* 成功時だけ枠を出す */
+}
+
+/* フッターリンク  */
+/* リンクエリアの配置 */
+.links {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 0.85rem;
+}
+
+/* 下部リンク：茶色系のアンダーライン付き */
+.links a {
+    color: #8b4513;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* 特殊効果  */
+/* アニメーション：ふわっと表示させるフェードイン */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
