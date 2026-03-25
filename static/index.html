@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古町レトロ・ガチャウォーク</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #e94560, #f5a623);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p { color: #aaa; margin-bottom: 30px; }
+        .buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        a {
+            display: inline-block;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        a:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(233,69,96,0.4); }
+        .btn-login { background: #e94560; color: #fff; }
+        .btn-register { background: transparent; color: #e94560; border: 2px solid #e94560; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎰 古町レトロ・ガチャウォーク</h1>
+        <p>古町の隠れた名店をガチャで発見しよう！</p>
+        <div class="buttons">
+            <a href="pages/login.html" class="btn-login">ログイン</a>
+            <a href="pages/register.html" class="btn-register">新規登録</a>
+        </div>
+    </div>
+</body>
+</html>

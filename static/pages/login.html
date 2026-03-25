@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - 古町ガチャ</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            background: #16213e;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        h1 { text-align: center; margin-bottom: 8px; color: #e94560; }
+        .subtitle { text-align: center; color: #aaa; margin-bottom: 24px; font-size: 0.9rem; }
+        label { display: block; margin-bottom: 6px; font-size: 0.9rem; color: #ccc; }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #2a2a4a;
+            border-radius: 8px;
+            background: #0f3460;
+            color: #eee;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-color: #e94560; }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #e94560;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background: #c73652; }
+        .message {
+            text-align: center;
+            margin-top: 16px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        .message.error { display: block; background: rgba(233,69,96,0.2); color: #e94560; }
+        .message.success { display: block; background: rgba(46,213,115,0.2); color: #2ed573; }
+        .links { text-align: center; margin-top: 20px; }
+        .links a { color: #e94560; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔑 ログイン</h1>
+        <p class="subtitle">古町レトロ・ガチャウォーク</p>
+
+        <form id="loginForm">
+            <label for="username">ユーザー名</label>
+            <input type="text" id="username" name="username" required placeholder="ユーザー名を入力">
+
+            <label for="password">パスワード</label>
+            <input type="password" id="password" name="password" required placeholder="パスワードを入力">
+
+            <button type="submit">ログイン</button>
+        </form>
+
+        <div id="message" class="message"></div>
+
+        <div class="links">
+            <p>アカウントがない方は <a href="register.html">新規登録</a></p>
+        </div>
+    </div>
+
+    <script>
+        // ----- ログイン処理 -----
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const msgEl = document.getElementById('message');
+            msgEl.className = 'message'; // リセット
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/api/login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    msgEl.className = 'message success';
+                    msgEl.textContent = 'ログイン成功！リダイレクト中...';
+                    setTimeout(() => { window.location.href = 'gacha.html'; }, 1000);
+                } else {
+                    msgEl.className = 'message error';
+                    msgEl.textContent = data.message;
+                }
+            } catch (err) {
+                msgEl.className = 'message error';
+                msgEl.textContent = '通信エラーが発生しました';
+            }
+        });
+    </script>
+</body>
+</html>

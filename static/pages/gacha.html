@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ガチャ - 古町ガチャ</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+        }
+        /* ヘッダー */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: #16213e;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .header h1 { font-size: 1.2rem; color: #e94560; }
+        .header .user-info { display: flex; align-items: center; gap: 12px; color: #aaa; }
+        .header button {
+            padding: 8px 16px;
+            background: transparent;
+            color: #e94560;
+            border: 1px solid #e94560;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .header button:hover { background: #e94560; color: #fff; }
+
+        /* メインコンテンツ */
+        .main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        /* ガチャボタン */
+        .gacha-btn {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #f5a623);
+            border: none;
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(233,69,96,0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 40px;
+        }
+        .gacha-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(233,69,96,0.6);
+        }
+        .gacha-btn:active { transform: scale(0.95); }
+        .gacha-btn.spinning {
+            animation: spin 0.5s ease-in-out;
+            pointer-events: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(0.9); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* 結果カード */
+        .result-card {
+            background: #16213e;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .result-card.show { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-card .shop-name {
+            font-size: 1.5rem;
+            color: #e94560;
+            margin-bottom: 8px;
+        }
+        .result-card .shop-genre {
+            display: inline-block;
+            background: #e94560;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .result-card .shop-image {
+            width: 100%;
+            height: 200px;
+            background: #0f3460;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            overflow: hidden;
+        }
+        .result-card .shop-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .result-card .shop-desc {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .result-card .shop-address {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+        .map-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #4285f4;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .map-btn:hover { background: #3367d6; }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <div class="header">
+        <h1>🎰 古町ガチャ</h1>
+        <div class="user-info">
+            <span id="usernameDisplay">---</span>
+            <button id="logoutBtn">ログアウト</button>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="main">
+        <button class="gacha-btn" id="gachaBtn">🎰<br>ガチャを回す！</button>
+
+        <!-- 結果表示エリア -->
+        <div class="result-card" id="resultCard">
+            <div class="shop-genre" id="shopGenre"></div>
+            <div class="shop-name" id="shopName"></div>
+            <div class="shop-image" id="shopImage">
+                <span>画像</span>
+            </div>
+            <div class="shop-desc" id="shopDesc"></div>
+            <div class="shop-address" id="shopAddress"></div>
+            <a class="map-btn" id="mapBtn" href="#" target="_blank">📍 Google Mapで見る</a>
+        </div>
+    </div>
+
+    <script>
+        // ----- ログイン状態チェック -----
+        async function checkLogin() {
+            try {
+                const res = await fetch('/api/user.php');
+                const data = await res.json();
+                if (!data.logged_in) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                document.getElementById('usernameDisplay').textContent = data.user.username;
+            } catch (err) {
+                window.location.href = 'login.html';
+            }
+        }
+        checkLogin();
+
+        // ----- ログアウト -----
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            await fetch('/api/logout.php');
+            window.location.href = 'login.html';
+        });
+
+        // ----- ガチャを回す -----
+        document.getElementById('gachaBtn').addEventListener('click', async function() {
+            const btn = this;
+            btn.classList.add('spinning');
+
+            try {
+                const res = await fetch('/api/gacha.php');
+                const data = await res.json();
+
+                if (data.success) {
+                    const shop = data.shop;
+
+                    // 結果を表示
+                    document.getElementById('shopName').textContent = shop.name;
+                    document.getElementById('shopGenre').textContent = shop.genre;
+                    document.getElementById('shopDesc').textContent = shop.description;
+                    document.getElementById('shopAddress').textContent = '📍 ' + shop.address;
+
+                    // 画像
+                    const imgContainer = document.getElementById('shopImage');
+                    imgContainer.innerHTML = '<img src="/' + shop.image + '" alt="' + shop.name + '" onerror="this.parentElement.innerHTML=\'<span>画像準備中</span>\'">';
+
+                    // Google Map リンク
+                    const mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(shop.address);
+                    document.getElementById('mapBtn').href = mapUrl;
+
+                    // カード表示
+                    const card = document.getElementById('resultCard');
+                    card.classList.remove('show');
+                    setTimeout(() => card.classList.add('show'), 100);
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('通信エラーが発生しました');
+            }
+
+            setTimeout(() => btn.classList.remove('spinning'), 500);
+        });
+    </script>
+</body>
+</html>
