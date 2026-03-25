@@ -77,18 +77,18 @@ try {
     // ===== 店舗データ投入 =====
     $shops = [
         [
-            'name' => 'カフェ日和',
-            'genre' => 'カフェ',
-            'image' => 'images/cafe_hiyori.jpg',
-            'description' => '古町の路地裏にひっそり佇む隠れ家カフェ。自家焙煎コーヒーと手作りスイーツが人気。',
-            'address' => '新潟県新潟市中央区古町通3番町'
+            'name' => '魚と地酒とワイン りべら',
+            'genre' => '#和食 ＃海鮮 ＃酒 ＃ワイン',
+            'image' => 'images/localsake_ribera.jpg',
+            'description' => '落ち着いた空間で頂く和食と地酒、そしてワイン。',
+            'address' => '新潟市中央区古町通9番町1475-4'
         ],
         [
-            'name' => '麺屋 銀次郎',
-            'genre' => 'ラーメン',
-            'image' => 'images/menya_ginjiro.jpg',
-            'description' => '濃厚味噌ラーメンが看板メニュー。新潟の地元食材を活かしたこだわりの一杯。',
-            'address' => '新潟県新潟市中央区古町通5番町'
+            'name' => '豚米（とんべい） ',
+            'genre' => 'おにぎり',
+            'image' => 'images/tonbei.jpg',
+            'description' => '「人生最高のおにぎり」を掲げる、ごちそうおにぎりと豚汁の専門店。新潟産コシヒカリとこだわり食材を使い、県外からもお客さんが訪れる人気',
+            'address' => '新潟県新潟市中央区古町通4番町632'
         ],
         [
             'name' => '酒処 ふるまち',
