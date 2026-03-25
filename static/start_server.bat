@@ -30,7 +30,9 @@ if not exist "db\gacha.db" (
 REM Show local IP addresses
 echo Your IP addresses:
 for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /R "IPv4"') do (
-    echo   http://%%a:8080
+    for /f "tokens=1" %%b in ("%%a") do (
+        echo   http://%%b:8080
+    )
 )
 echo.
 echo Local: http://localhost:8080
