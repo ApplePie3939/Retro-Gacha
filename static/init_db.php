@@ -123,7 +123,7 @@ try {
         [
             'name' => 'シン鉄板ビストロ',
             'genre' => 'お肉',
-            'image' => 'images/bisutro.jpg',
+            'image' => 'images/bisutoro.jpg',
             'description' => '品質にこだわった新潟県産和牛を鉄板で焼き上げるライブ感をお楽しみください！',
             'address' => '新潟県新潟市中央区古町通8番町1493'
         ],
