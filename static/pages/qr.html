@@ -5,48 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QRコード読み取り - 古町ガチャ</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <link rel="stylesheet" href="css/retro.css">
     <style>
-        /* QR特有のスタイル */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+        }
+        /* ヘッダー */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: #16213e;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .header h1 { font-size: 1.2rem; color: #e94560; }
+        .header .user-info { display: flex; align-items: center; gap: 12px; color: #aaa; }
+        
+        .header a.back-btn {
+            padding: 8px 16px;
+            background: transparent;
+            color: #ccc;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+        .header a.back-btn:hover { background: #333; }
+
+        /* メインコンテンツ */
+        .main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: #f5a623;
+        }
+        
+        .desc {
+            margin-bottom: 30px;
+            color: #ccc;
+            text-align: center;
+        }
+
         #reader {
             width: 100%;
             max-width: 500px;
-            background: #fff;
-            border: 3px double #8b4513;
-            border-radius: 4px;
+            background: #16213e;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 8px 8px 0px rgba(139, 69, 19, 0.1);
-            margin-bottom: 30px;
-            padding: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         }
         
-        /* html5-qrcodeが作成するボタンなどの上書き */
         #reader button {
-            background: #a04040 !important;
-            color: white !important;
-            border: none !important;
-            padding: 10px 20px !important;
-            border-radius: 4px !important;
-            cursor: pointer !important;
-            margin: 5px !important;
-            font-family: inherit !important;
-            font-weight: bold !important;
-            box-shadow: 4px 4px 0px #5d2e0d !important;
-            transition: all 0.2s !important;
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
         }
-        #reader button:hover {
-            transform: translate(2px, 2px) !important;
-            box-shadow: 2px 2px 0px #5d2e0d !important;
-        }
-        
         #reader select {
             padding: 8px;
-            border-radius: 4px;
-            background: #fff;
-            color: #333;
-            border: 1px solid #8b4513;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
             margin-bottom: 10px;
-            font-family: inherit;
         }
 
         /* 結果メッセージ */
@@ -54,35 +89,21 @@
             max-width: 500px;
             width: 100%;
             padding: 20px;
-            border-radius: 4px;
+            border-radius: 8px;
             text-align: center;
             margin-top: 20px;
             font-weight: bold;
             display: none;
-            border: 3px double #8b4513;
-            background: #fff;
-            box-shadow: 6px 6px 0px rgba(139, 69, 19, 0.1);
         }
         .success {
-            color: #2e5a2e;
-            border-color: #2e5a2e !important;
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+            color: #2ecc71;
         }
         .error {
-            color: #a04040;
-            border-color: #a04040 !important;
-        }
-
-        .desc {
-            margin-bottom: 30px;
-            color: #444;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .qr-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
         }
     </style>
 </head>
@@ -90,14 +111,14 @@
     <div class="header">
         <h1>🔍 QRコード読み取り</h1>
         <div class="user-info">
-            <span id="coinsDisplay" class="coin-display">💰 ?</span>
-            <a href="gacha.html" class="retro-btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">戻る</a>
+            <span id="coinsDisplay">💰 ?</span>
+            <a href="gacha.html" class="back-btn">ガチャへ戻る</a>
         </div>
     </div>
 
-    <div class="container qr-container">
-        <h2 class="retro-title">店舗を探してコインを獲得</h2>
-        <p class="desc">お店のQRコードをスキャンすると、<br>ガチャを回せるコインが進呈されます。</p>
+    <div class="main">
+        <h2>店舗を見つけてコインをGET！</h2>
+        <p class="desc">お店にあるQRコードをスキャンすると、ガチャに使えるコインがもらえます。</p>
 
         <div id="reader"></div>
 
