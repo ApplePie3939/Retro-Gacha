@@ -1,0 +1,143 @@
+/* retro.css - 古町レトロ共通スタイル */
+
+/* 全要素のリセット */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 全体の背景設定：和紙のような質感 */
+body {
+    background-color: #f4f1ea;
+    background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+    font-family: "Sawarabi Mincho", "Hiragino Mincho ProN", "serif";
+    color: #333;
+    line-height: 1.6;
+}
+
+/* ヘッダー */
+.header {
+    background: #fff;
+    border-bottom: 3px double #8b4513;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    color: #a04040;
+    margin: 0;
+}
+
+/* 各種カード・コンテナ */
+.retro-card {
+    background: #fff;
+    border: 3px double #8b4513;
+    border-radius: 4px;
+    padding: 24px;
+    box-shadow: 8px 8px 0px rgba(139, 69, 19, 0.1);
+    margin-bottom: 24px;
+}
+
+/* ボタン：千社札や印鑑のようなイメージ */
+.retro-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #a04040;
+    color: #fff;
+    border: none;
+    box-shadow: 4px 4px 0px #5d2e0d;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #803030;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #5d2e0d;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #8b4513;
+    border: 2px solid #8b4513;
+    box-shadow: 4px 4px 0px rgba(139, 69, 19, 0.1);
+}
+
+.btn-secondary:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px rgba(139, 69, 19, 0.1);
+}
+
+.btn-success {
+    background: #2e5a2e; /* 常盤色（緑系） */
+    color: #fff;
+    border: none;
+    box-shadow: 4px 4px 0px #1a3a1a;
+}
+
+.btn-success:hover {
+    background: #244624;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #1a3a1a;
+}
+
+.btn-warning {
+    background: #f5a623;
+    color: #fff;
+    border: none;
+    box-shadow: 4px 4px 0px #ab7318;
+}
+
+.btn-warning:hover {
+    background: #d48f1f;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #ab7318;
+}
+
+/* テキスト装飾 */
+.retro-title {
+    color: #a04040;
+    border-bottom: 2px solid #a04040;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    display: inline-block;
+}
+
+.retro-subtitle {
+    color: #666;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+/* コイン表示などの装飾 */
+.coin-display {
+    color: #8b4513;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 4px 12px;
+    border: 1px solid #8b4513;
+    background: #fff;
+    border-radius: 20px;
+}
+
+/* 汎用的な余白設定 */
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
