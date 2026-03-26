@@ -78,7 +78,7 @@ try {
     $shops = [
         [
             'name' => '魚と地酒とワイン りべら',
-            'genre' => '#和食 ＃海鮮 ＃酒 ＃ワイン',
+            'genre' => '酒',
             'image' => 'images/localsake_ribera.jpg',
             'description' => '落ち着いた空間で頂く和食と地酒、そしてワイン。',
             'address' => '新潟市中央区古町通9番町1475-4'
@@ -87,36 +87,36 @@ try {
             'name' => '豚米（とんべい） ',
             'genre' => 'おにぎり',
             'image' => 'images/tonbei.jpg',
-            'description' => '「人生最高のおにぎり」を掲げる、ごちそうおにぎりと豚汁の専門店。新潟産コシヒカリとこだわり食材を使い、県外からもお客さんが訪れる人気',
+            'description' => '「人生最高のおにぎり」を掲げる、ごちそうおにぎりと豚汁の専門店。',
             'address' => '新潟県新潟市中央区古町通4番町632'
         ],
         [
-            'name' => '酒処 ふるまち',
+            'name' => '麺亭',
+            'genre' => 'ラーメン',
+            'image' => 'images/mentei.jpg',
+            'description' => '夜遅くまで営業し、飲み歩きの後や深夜の小腹を満たすのにぴったりな町中華',
+            'address' => '新潟県新潟市中央区古町通8-1452-2藤和ビル1F'
+        ],
+        [
+            'name' => 'シン鉄板ビストロ',
+            'genre' => 'お肉',
+            'image' => 'images/bisutro.jpg',
+            'description' => '品質にこだわった新潟県産和牛を鉄板で焼き上げるライブ感をお楽しみください！',
+            'address' => '新潟県新潟市中央区古町通8番町1493'
+        ],
+        [
+            'name' => '喜ぐち',
             'genre' => '居酒屋',
-            'image' => 'images/sakadokoro_furumachi.jpg',
-            'description' => '新潟の地酒を30種以上取り揃えた老舗居酒屋。旬の魚料理が絶品。',
-            'address' => '新潟県新潟市中央区古町通7番町'
+            'image' => 'images/kiguti.jpg',
+            'description' => '創業は昭和40年、世代を超えて愛され続けるローカル酒場',
+            'address' => '新潟県新潟市中央区古町通10番町1720'
         ],
         [
-            'name' => '古着屋 モノクローム',
-            'genre' => '古着',
-            'image' => 'images/monochrome.jpg',
-            'description' => 'ヴィンテージからモダンまで、個性的なセレクトが光る古着屋。',
-            'address' => '新潟県新潟市中央区古町通4番町'
-        ],
-        [
-            'name' => '和菓子処 花鶴',
-            'genre' => '和菓子',
-            'image' => 'images/hanatsuru.jpg',
-            'description' => '創業80年の老舗和菓子店。季節の上生菓子と抹茶セットが人気。',
-            'address' => '新潟県新潟市中央区古町通2番町'
-        ],
-        [
-            'name' => '雑貨屋 ことのは',
-            'genre' => '雑貨',
-            'image' => 'images/kotonoba.jpg',
-            'description' => '新潟の作家によるハンドメイド雑貨を中心に扱うセレクトショップ。',
-            'address' => '新潟県新潟市中央区古町通6番町'
+            'name' => 'おまかせ食堂 ななや',
+            'genre' => '定食屋',
+            'image' => 'images/nanaya.jpg',
+            'description' => '古町で味わう“お母さん”の味',
+            'address' => '新潟県新潟市中央区古町通7番町1005-3'
         ],
         [
             'name' => 'イタリアン・ピッコロ',
@@ -165,7 +165,7 @@ try {
         // QRコード生成して保存 (QRServer APIを使用)
         $qr_data = json_encode(['shop_id' => (int)$shop_id]);
         $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data=" . urlencode($qr_data);
-        
+
         // 外部APIを叩いて画像を保存
         $qr_image = @file_get_contents($qr_url);
         if ($qr_image !== false) {
@@ -179,7 +179,6 @@ try {
 
     echo "\n===== 初期化完了 =====\n";
     echo "データベース: {$db_path}\n";
-
 } catch (PDOException $e) {
     echo "エラー: " . $e->getMessage() . "\n";
     exit(1);
