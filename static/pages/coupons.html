@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クーポン - 古町ガチャ</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+        }
+        /* ヘッダー */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: #16213e;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .header h1 { font-size: 1.2rem; color: #e94560; }
+        .header .user-info { display: flex; align-items: center; gap: 12px; color: #aaa; }
+        
+        .nav-buttons {
+            display: flex; gap: 10px;
+        }
+        .nav-buttons a {
+            padding: 8px 16px;
+            background: transparent;
+            color: #ccc;
+            border: 1px solid #555;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .nav-buttons a:hover { background: #333; color: #fff; }
+
+        /* メインコンテンツ */
+        .main {
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section-title {
+            font-size: 1.4rem;
+            color: #f5a623;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2a2a4a;
+            padding-bottom: 8px;
+            margin-top: 40px;
+        }
+        .section-title:first-child { margin-top: 0; }
+
+        .coupon-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .coupon-card {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid #2a2a4a;
+        }
+        .coupon-name {
+            font-size: 1.1rem;
+            color: #e94560;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .coupon-desc {
+            color: #bbb;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+        .coupon-price {
+            color: #f5a623;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+        .buy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #e94560;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .buy-btn:hover:not(:disabled) { background: #d03b55; transform: translateY(-2px); }
+        .buy-btn:active:not(:disabled) { transform: translateY(0); }
+        .buy-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+        .my-coupon-card {
+            background: #1a1a2e;
+            border-left: 4px solid #4285f4;
+        }
+        .my-coupon-date {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #2a2a4a;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎟️ クーポン交換所</h1>
+        <div class="user-info">
+            <span id="coinsDisplay" style="color:#f5a623; font-weight:bold;">💰 ---</span>
+            <div class="nav-buttons">
+                <a href="gacha.html">🏠 ガチャに戻る</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <h2 class="section-title">購入可能なクーポン</h2>
+        <div class="coupon-list" id="availableCoupons">
+            <p style="color:#888;">読み込み中...</p>
+        </div>
+
+        <h2 class="section-title">マイクーポン (所持済み)</h2>
+        <div class="coupon-list" id="myCoupons">
+            <p style="color:#888;">読み込み中...</p>
+        </div>
+    </div>
+
+    <script>
+        let currentUserCoins = 0;
+
+        async function init() {
+            try {
+                const res = await fetch('/api/user.php');
+                const data = await res.json();
+                if (!data.logged_in) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUserCoins = data.user.coins;
+                updateCoinDisplay(currentUserCoins);
+                
+                await Promise.all([loadAvailableCoupons(), loadMyCoupons()]);
+            } catch (err) {
+                console.error(err);
+                alert('エラーが発生しました。再度ログインしてください。');
+            }
+        }
+
+        function updateCoinDisplay(coins) {
+            document.getElementById('coinsDisplay').textContent = `💰 ${coins}`;
+        }
+
+        async function loadAvailableCoupons() {
+            try {
+                const res = await fetch('/api/coupons.php');
+                const data = await res.json();
+                const container = document.getElementById('availableCoupons');
+                container.innerHTML = '';
+
+                if (data.success && data.coupons && data.coupons.length > 0) {
+                    data.coupons.forEach(coupon => {
+                        const canBuy = currentUserCoins >= coupon.coin_price;
+                        
+                        const div = document.createElement('div');
+                        div.className = 'coupon-card';
+                        div.innerHTML = `
+                            <div>
+                                <div class="coupon-name">${escapeHTML(coupon.name)}</div>
+                                <div class="coupon-desc">${escapeHTML(coupon.description)}</div>
+                            </div>
+                            <div>
+                                <div class="coupon-price">💰 ${coupon.coin_price} コイン</div>
+                                <button class="buy-btn" ${canBuy ? '' : 'disabled'} onclick="buyCoupon(${coupon.id}, '${escapeHTML(coupon.name)}', ${coupon.coin_price})">
+                                    ${canBuy ? '購入する' : 'コイン不足'}
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                } else {
+                    container.innerHTML = '<p style="color:#888;">現在購入できるクーポンはありません。</p>';
+                }
+            } catch(e) { 
+                console.error(e); 
+                document.getElementById('availableCoupons').innerHTML = '<p style="color:#e94560;">クーポンの読み込みに失敗しました。</p>';
+            }
+        }
+
+        async function loadMyCoupons() {
+            try {
+                const res = await fetch('/api/my_coupons.php');
+                const data = await res.json();
+                const container = document.getElementById('myCoupons');
+                container.innerHTML = '';
+
+                if (data.success && data.my_coupons && data.my_coupons.length > 0) {
+                    data.my_coupons.forEach(uc => {
+                        const date = new Date(uc.created_at).toLocaleString('ja-JP');
+                        const div = document.createElement('div');
+                        div.className = 'coupon-card my-coupon-card';
+                        div.innerHTML = `
+                            <div>
+                                <div class="coupon-name">${escapeHTML(uc.name)}</div>
+                                <div class="coupon-desc">${escapeHTML(uc.description)}</div>
+                            </div>
+                            <div class="my-coupon-date">
+                                獲得日: ${date}<br>
+                                状態: <b>${uc.is_used ? '<span style="color:#888;">使用済み</span>' : '<span style="color:#28a745;">未使用</span>'}</b>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                } else {
+                    container.innerHTML = '<p style="color:#888;">まだクーポンを持っていません。</p>';
+                }
+            } catch(e) { 
+                console.error(e); 
+                document.getElementById('myCoupons').innerHTML = '<p style="color:#e94560;">クーポンの読み込みに失敗しました。</p>';
+            }
+        }
+
+        async function buyCoupon(couponId, name, price) {
+            if (!confirm(`「${name}」を ${price} コインで購入しますか？`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/buy_coupon.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ coupon_id: couponId })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    currentUserCoins = data.remaining_coins;
+                    updateCoinDisplay(currentUserCoins);
+                    await Promise.all([loadAvailableCoupons(), loadMyCoupons()]);
+                } else {
+                    alert('エラー: ' + data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('通信エラーが発生しました');
+            }
+        }
+
+        function escapeHTML(str) {
+            return String(str).replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        init();
+    </script>
+</body>
+</html>

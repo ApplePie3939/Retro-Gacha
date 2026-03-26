@@ -74,6 +74,29 @@ try {
     ");
     echo "shop_coin_historyテーブルを作成しました\n";
 
+    // couponsテーブル
+    $pdo->exec("
+        CREATE TABLE coupons (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT NOT NULL,
+            coin_price INTEGER NOT NULL
+        )
+    ");
+    echo "couponsテーブルを作成しました\n";
+
+    // user_couponsテーブル
+    $pdo->exec("
+        CREATE TABLE user_coupons (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            coupon_id INTEGER NOT NULL,
+            is_used INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+    echo "user_couponsテーブルを作成しました\n";
+
     // ===== 店舗データ投入 =====
     $shops = [
         [
@@ -162,6 +185,19 @@ try {
         }
     }
     echo count($shops) . "件の店舗データを投入しました\n";
+
+    // ===== クーポンデータ投入 =====
+    $coupons = [
+        ['name' => '全店共通 100円引き', 'description' => '全てのお店で使える100円割引券です。', 'coin_price' => 50],
+        ['name' => 'ワンドリンクサービス', 'description' => '対象店舗でドリンクが1杯無料になります。', 'coin_price' => 30],
+        ['name' => '大盛り無料券', 'description' => 'ラーメンや定食のご飯を大盛りにできます。', 'coin_price' => 20],
+        ['name' => '激レア酒 試飲券', 'description' => '酒場で特別な地酒を一口試飲できます。', 'coin_price' => 100],
+    ];
+    $stmt_c = $pdo->prepare("INSERT INTO coupons (name, description, coin_price) VALUES (:name, :description, :coin_price)");
+    foreach ($coupons as $coupon) {
+        $stmt_c->execute($coupon);
+    }
+    echo count($coupons) . "件のクーポンデータを投入しました\n";
 
     echo "\n===== 初期化完了 =====\n";
     echo "データベース: {$db_path}\n";
