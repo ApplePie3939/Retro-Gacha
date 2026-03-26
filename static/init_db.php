@@ -188,10 +188,10 @@ try {
 
     // ===== クーポンデータ投入 =====
     $coupons = [
-        ['name' => '全店共通 100円引き', 'description' => '全てのお店で使える100円割引券です。', 'coin_price' => 50],
-        ['name' => 'ワンドリンクサービス', 'description' => '対象店舗でドリンクが1杯無料になります。', 'coin_price' => 30],
-        ['name' => '大盛り無料券', 'description' => 'ラーメンや定食のご飯を大盛りにできます。', 'coin_price' => 20],
-        ['name' => '激レア酒 試飲券', 'description' => '酒場で特別な地酒を一口試飲できます。', 'coin_price' => 100],
+        ['name' => '全店共通 100円引き', 'description' => '全てのお店で使える100円割引券です。', 'coin_price' => 300],
+        ['name' => 'ワンドリンクサービス', 'description' => '対象店舗でドリンクが1杯無料になります。', 'coin_price' => 450],
+        ['name' => '大盛り無料券', 'description' => 'ラーメンや定食のご飯を大盛りにできます。', 'coin_price' => 100],
+        ['name' => '激レア酒 試飲券', 'description' => '酒場で特別な地酒を一口試飲できます。', 'coin_price' => 600],
     ];
     $stmt_c = $pdo->prepare("INSERT INTO coupons (name, description, coin_price) VALUES (:name, :description, :coin_price)");
     foreach ($coupons as $coupon) {
