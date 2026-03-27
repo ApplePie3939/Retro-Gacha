@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webガチャ演出</title>
+    <link rel="stylesheet" href="gacha.css">
+</head>
+<body>
+    <div id="wrapper">
+        <img class="background" src="../../png/古町.jpeg" alt="背景">
+        <div id="machine-container" class="machine-container">
+            <!-- ガチャ本体 -->
+            <img class="machine-body" src="../../png/ガチャ-ベース.png" alt="ガチャ本体">
+            <!-- ガチャを回すハンドル -->
+            <img class="machine-handle" src="../../png/ガチャ-手持ち.png" id="handle" alt="ハンドル">
+            
+            <!-- 出てくるカプセル（最初は隠す） -->
+            <div id="dispense-area">
+                <img class="capsule hidden" src="../../png/ガチャ-red.png" id="falling-capsule" alt="カプセル">
+            </div>
+            
+            <!-- クリックの誘導テキスト -->
+            <div id="instruction-text" class="instruction-text">ハンドルをクリックして回す！</div>
+        </div>
+    </div>
+
+    <!-- ズームアップと結果表示用画面（最初は非表示） -->
+    <div id="overlay" class="overlay hidden">
+        <div class="zoom-container">
+            <img class="capsule-zoom" src="../../png/ガチャ-red.png" id="zoom-capsule" alt="カプセル">
+            <img class="capsule-open hidden" src="../../png/ガチャ-red_open.png" id="open-capsule" alt="開いたカプセル">
+        </div>
+        <div id="result-text" class="result-text hidden">ガチャ結果！</div>
+    </div>
+
+    <script src="gacha.js"></script>
+</body>
+</html>

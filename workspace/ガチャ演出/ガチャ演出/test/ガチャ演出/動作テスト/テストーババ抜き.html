@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ババ抜き</title>
+        
+        <style>
+            body {
+                background-color : #eee;
+            }
+            #start, #next, #shuffle {
+                font-size : 15px;
+                background-color : #fff;
+                text-align : center;
+            }
+            #result {
+                font-size : 15px;
+                background-color : #fff;
+            }
+            #player00Info, #player01Info, #player02Info, #player03Info {
+                font-size : 20px;
+            }
+            #card {
+                font-family:'MS Gothic';
+                font-size : 20px;
+                text-align : center;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <div>
+                <span id="button"></span>
+                <p id="result"></p>
+                <p id="turn"></p>
+                <p id="player00Info"></p>
+                <p id="player01Info"></p>
+                <p id="player02Info"></p>
+                <p id="player03Info"></p>
+            </div>
+        </div>
+        <script language="JavaScript">
+            
+            // カード基本情報
+            const MAX_NUM = 13;
+            const MIN_NUM = 1;
+            const CARD_JOKER = "JKR";
+            const CARD_SPADE = "&#9824;";
+            const CARD_CLUB  = "&#9827;";
+            const CARD_HEART = "&#9829;";
+            const CARD_DIA   = "&#9830;";
+            const COLOR_01   = "black";
+            const COLOR_02   = "red";
+            const COLOR_03   = "white";
+            
+            // ババ抜き情報
+            const MAX_PLAYER = 4;
+            
+            // その他
+            const MAX_SHUFFLE = 6;
+            //const FLAG_DEBUG = true;
+            const FLAG_DEBUG = false;
+            
+            // カード
+            function Card(mark, num) {
+                // プロパティ
+                this.mark = mark;
+                this.num = num;
+            }
+            
+            // デッキ
+            function Deck() {
+                // プロパティ
+                this.deck = [];
+                
+                // 初期化処理
+                this.init = function() {
+                    this.deck = [];
+                    return;
+                };
+                
+                // デッキ作成処理
+                this.make = function() {
+                    let card;
+                    //for (let num = MIN_NUM; num <= 5; num++) {
+                    for (let num = MIN_NUM; num <= MAX_NUM; num++) {
+                        card = new Card(CARD_SPADE, num);
+                        this.deck.push(card);
+                        card = new Card(CARD_CLUB, num);
+                        this.deck.push(card);
+                        card = new Card(CARD_HEART, num);
+                        this.deck.push(card);
+                        card = new Card(CARD_DIA, num);
+                        this.deck.push(card);
+                    }
+                    card = new Card(CARD_JOKER, 0);
+                    this.deck.push(card);
+                    return;
+                };
+                
+                // デッキシャッフル処理
+                this.shuffle = function() {
+                    for (let loop = 0; loop < this.deck.length; loop++) {
+                        let random = Math.floor(Math.random() * this.deck.length);
+                        let work = this.deck[0];
+                        this.deck[0] = this.deck[random];
+                        this.deck[random] = work;
+                    }
+                    return;
+                };
+                
+                // ドロー処理
+                this.draw = function() {
+                    return this.deck.shift();
+                };
+            }
+            
+            // 手札
+            function Hand() {
+                // プロパティ
+                this.hand = [];
+                
+                // 初期化処理
+                this.init = function() {
+                    this.hand = [];
+                    return;
+                };
+                
+                // 手札セット処理
+                this.set = function(card) {
+                    this.hand.push(card);
+                    return;
+                };
+                
+                // 手札全取得処理
+                this.getAll = function() {
+                    return this;
+                };
+                
+                // 手札全整理処理
+                this.checkPairAll = function() {
+                    // ペアを探し、見つけたら捨てる。
+                    let handInfo = this.getAll();
+                    for (let baseIdx = 0; baseIdx < handInfo.hand.length; baseIdx++) {
+                        for (let targetIdx = 0; targetIdx < handInfo.hand.length; targetIdx++) {
+                            if ((targetIdx != baseIdx) &&
+                                (handInfo.hand[targetIdx].num == handInfo.hand[baseIdx].num)) {
+                                if (targetIdx < baseIdx) {
+                                    handInfo.hand.splice(baseIdx, 1);
+                                    handInfo.hand.splice(targetIdx, 1);
+                                } else {
+                                    handInfo.hand.splice(targetIdx, 1);
+                                    handInfo.hand.splice(baseIdx, 1);
+                                }
+                                baseIdx--;
+                                break;
+                            }
+                        }
+                    }
+                    return;
+                };
+                
+                // 指定手札取得処理
+                this.getTarget = function(index) {
+                    // 引数で指定した手札を返す。
+                    let handInfo = this.getAll();
+                    let card;
+                    //alert("len:" + handInfo.hand.length);
+                    for (let loop = 0; loop < handInfo.hand.length; loop++) {
+                        if (loop == index) {
+                            card = handInfo.hand[loop];
+                            handInfo.hand.splice(loop, 1);
+                            break;
+                        }
+                    }
+                    //alert("mark:" + card.mark + "  num:" + card.num);
+                    return card;
+                };
+                
+                // 手札シャッフル処理
+                this.shuffle = function() {
+                    let handInfo = this.getAll();
+                    for (let loop = 0; loop < handInfo.hand.length; loop++) {
+                        let random = Math.floor(Math.random() * handInfo.hand.length);
+                        let work = handInfo.hand[0];
+                        handInfo.hand[0] = handInfo.hand[random];
+                        handInfo.hand[random] = work;
+                    }
+                    return;
+                };
+            }
+            
+            // 桁数整形処理
+            function spacePadding(num){
+                return (Array(2).join(" ") + num).slice(-2);
+            }
+            
+            // 桁数整形処理
+            function zeroPadding(num){
+                return (Array(2).join("0") + num).slice(-2);
+            }
+            
+            // プレイヤー
+            function Player() {
+                // プロパティ
+                this.strWin = "";
+                this.results = [];
+                this.results["win1"] = 0;
+                this.results["win2"] = 0;
+                this.results["win3"] = 0;
+                this.results["lose"] = 0;
+                this.cpu = true;
+                this.shuffle = false;
+                
+                // 初期化処理
+                this.init = function() {
+                    // 抜けた番目を初期化する。
+                    this.strWin = "";
+                    
+                    // シャッフルタイム使用フラグを初期化する。
+                    this.shuffle = false;
+                    return;
+                };
+                
+                // CPUフラグ設定処理
+                this.setCpu = function(flag) {
+                    // CPUフラグを設定する。trueがCPU。
+                    this.cpu = flag;
+                    return;
+                };
+            }
+            
+            // ババ抜き
+            function OldMaid () {
+                // プロパティ
+                let cntTurn = 0;
+                let cntWin = 1;
+                let players = [];
+                players[0] = new Player();
+                players[1] = new Player();
+                players[2] = new Player();
+                players[3] = new Player();
+                let deck = new Deck();
+                let hands = [];
+                hands[0] = new Hand();
+                hands[1] = new Hand();
+                hands[2] = new Hand();
+                hands[3] = new Hand();
+                
+                // 初期化処理
+                this.init = function() {
+                    // ターン数を初期化する。
+                    cntTurn = 0;
+                    
+                    // 抜けた番目を初期化する。
+                    cntWin = 1;
+                    
+                    // デッキの初期化処理を呼び出す。
+                    deck.init();
+                    
+                    // プレイヤーの初期化処理を呼び出す。
+                    players[0].init();
+                    players[1].init();
+                    players[2].init();
+                    players[3].init();
+                    
+                    // 手札の初期化処理を呼び出す。
+                    hands[0].init();
+                    hands[1].init();
+                    hands[2].init();
+                    hands[3].init();
+                    
+                    // CPUフラグ設定処理を呼び出す。
+                    players[0].setCpu(false);
+                    return;
+                };
+                
+                // カードイメージ作成処理
+                this.makeCardImg = function(card, playerId, index) {
+                    // 黒色
+                    let color = COLOR_01;
+                    if ((card.mark == CARD_HEART) || (card.mark == CARD_DIA)) {
+                        // 赤色
+                        color = COLOR_02;
+                    }
+                    
+                    // カードイメージを作成する。
+                    let cardImg = "";
+                    if (card.mark != CARD_JOKER) {
+                        // ジョーカー以外である場合
+                        cardImg += "<span id='card' ";
+                        cardImg += "name='" + String(playerId) + "_" + String(index) + "' ";
+                        cardImg += "style='color:" + color + "; ";
+                        cardImg += "background-color:" + COLOR_03 + ";'>";
+                        cardImg += card.mark + String(spacePadding(card.num));
+                        cardImg += "</span>";
+                    } else {
+                        // ジョーカーである場合
+                        cardImg += "<span id='card' ";
+                        cardImg += "name='" + String(playerId) + "_" + String(index) + "' ";
+                        cardImg += "style='color:" + color + "; ";
+                        cardImg += "background-color:" + COLOR_03 + ";'>";
+                        cardImg += card.mark;
+                        cardImg += "</span>";
+                    }
+                    return cardImg;
+                };
+                
+                // 手札表示共通処理
+                this.outputHandPCommon = function(playerId, handInfo) {
+                    let detail = "";
+                    if (handInfo.hand.length == 0) {
+                        // 抜けたプレイヤーである場合
+                        if (players[playerId].strWin == "") {
+                            // 抜けた初回である場合
+                            players[playerId].strWin = "<span id='card' ";
+                            players[playerId].strWin += "style='color:" + COLOR_02 + "; ";
+                            players[playerId].strWin += "background-color:" + COLOR_03 + ";'>";
+                            players[playerId].strWin += "　　" + String(cntWin) + "抜け" + "　　";
+                            players[playerId].strWin += "</span>";
+                            players[playerId].results["win" + cntWin]++;
+                            cntWin++;
+                        }
+                        detail = players[playerId].strWin;
+                    } else {
+                        // 抜けていないプレイヤーである場合
+                        for (let loop = 0; loop < handInfo.hand.length; loop++) {
+                            let card = handInfo.hand[loop];
+                            if (FLAG_DEBUG == true) {
+                                // カードイメージ作成処理を呼び出す。
+                                //alert("outputHandPCommon card:" + card.mark + card.num + " playerId:" + playerId + " loop:" + loop);
+                                detail += this.makeCardImg(card, playerId, loop);
+                            } else {
+                                //if ((playerId == cntTurn) && (players[playerId].cpu == false)) {
+                                if (players[playerId].cpu == false) {
+                                    // カードイメージ作成処理を呼び出す。
+                                    detail += this.makeCardImg(card, playerId, loop);
+                                } else {
+                                    detail += "<span id='card' ";
+                                    detail += "name='" + String(playerId) + "_" + String(loop) + "' ";
+                                    detail += "style='color:" + COLOR_01 + "; ";
+                                    detail += "background-color:" + COLOR_01 + ";'>";
+                                    //detail += "&#92171;";
+                                    detail += CARD_SPADE + "XX";
+                                    detail += "</span>";
+                                }
+                            }
+                            detail += "　";
+                        }
+                    }
+                    return detail;
+                };
+                
+                // 手札表示処理
+                this.outputHandP = function() {
+                    for (let loop = 0; loop < MAX_PLAYER; loop++) {
+                        // 各プレーヤーごとに手札表示共通処理を呼び出す。
+                        let handInfo = hands[loop].getAll();
+                        let work = String(zeroPadding(loop + 1)) + "：" + this.outputHandPCommon(loop, handInfo);
+                        if (loop != 3) {
+                            work += "<br>↓";
+                        }
+                        
+                        // 処理結果を設定する。
+                        let id = "player" + String(zeroPadding(loop)) + "Info";
+                        document.getElementById(id).innerHTML = work;
+                    }
+                    return;
+                };
+                
+                // 手札配布処理
+                this.distribute = function() {
+                    let loop = 0;
+                    while(1) {
+                        // デッキからカードをドローする。
+                        let card = deck.draw();
+                        if (card == undefined) {
+                            //alert("手札配布終了！");
+                            break;
+                        }
+                        
+                        // 手札セット処理を呼び出す。
+                        hands[loop % MAX_PLAYER].set(card);
+                        loop++;
+                    }
+                    return;
+                };
+                
+                // ジョーカー探索処理
+                this.searchJoker = function() {
+                    let info = [];
+                    for (let playerId = 0; playerId < MAX_PLAYER; playerId++) {
+                        //alert("searchJoker playerId:" + playerId);
+                        let handInfo = hands[playerId].getAll();
+                        //alert("searchJoker len:" + handInfo.hand.length);
+                        let index;
+                        for (index = 0; index < handInfo.hand.length; index++) {
+                            if (handInfo.hand[index].mark != CARD_JOKER) {
+                                continue;
+                            }
+                            // プレイヤーと手札の情報を設定する。
+                            info["id"] = playerId;
+                            info["index"] = index;
+                            break;
+                        }
+                        if (index < handInfo.hand.length) {
+                            break;
+                        }
+                    }
+                    //alert("searchJoker playerId:" + info["id"] + "  index:" + info["index"]);
+                    return info;
+                };
+                
+                // ゲーム終了判定処理
+                this.isFin = function() {
+                    let result;
+                    if (cntWin >= MAX_PLAYER) {
+                        // ゲーム終了
+                        result = true;
+                    } else {
+                        // ゲーム続行
+                        result = false;
+                    }
+                    return result;
+                };
+                
+                // ゲーム終了処理
+                this.fin = function() {
+                    // ジョーカー探索処理を呼び出す。
+                    let info = this.searchJoker();
+                    //alert("fin playerId:" + info["id"] + "  index:" + info["index"]);
+                    
+                    // 処理結果を設定する。
+                    let playerName = "プレイヤー" + String(zeroPadding(info["id"] + 1));
+                    let work = "<p id='turn' style='color:red'>勝敗：" + playerName + "の負け</p>";
+                    document.getElementById("turn").innerHTML = work;
+                    
+                    // 開始ボタンを活性に変更する。
+                    document.getElementById("start").disabled = false;
+                    
+                    // 次へボタンを活性に変更する。
+                    document.getElementById("next").disabled = true;
+                    
+                    // シャッフルボタンを活性に変更する。
+                    document.getElementById("shuffle").disabled = true;
+                    
+                    // 勝敗カウンタをインクリメントする。
+                    for (let loop = 0; loop < MAX_PLAYER; loop++) {
+                        if (loop == info["id"]) {
+                            players[loop].results["lose"]++;
+                        } else {
+                            //let winindex = "win" + info["id"];
+                            //alert("winindex"+winindex);
+                            //players[loop].results[winindex]++;
+                        }
+                    }
+                    
+                    // 結果表示処理を呼び出す。
+                    this.outputResult();
+                    return;
+                };
+                
+                // シャッフルタイム実処理
+                this.shuffleTimeCore = function(kind) {
+                    let winPlayerId = -1;
+                    if (kind <= 3) {
+                        // 抜けているプレイヤーがいるか確認する。
+                        // 2人以上抜けている場合は、本メソッドは呼ばれない想定。
+                        for (let playerId = 0; playerId < MAX_PLAYER; playerId++) {
+                            if (players[playerId].strWin != "") {
+                                winPlayerId = playerId;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // 手札をシャッフルする。
+                    let work;
+                    switch (kind) {
+                        case 0  : alert("出目 : 右1(手札を右隣りに1つ移動。)");
+                                  hands.unshift(hands.pop());
+                                  if (winPlayerId >= 0) {
+                                      work = hands[winPlayerId];
+                                      hands[winPlayerId] = hands[(winPlayerId + 1) % MAX_PLAYER];
+                                      hands[(winPlayerId + 1) % MAX_PLAYER] = work;
+                                  }
+                                  break;
+                        case 1  : alert("出目 : 右2(手札を右隣りに2つ移動。)");
+                                  hands.unshift(hands.pop());
+                                  if (winPlayerId >= 0) {
+                                      work = hands[winPlayerId];
+                                      hands[winPlayerId] = hands[(winPlayerId + 1) % MAX_PLAYER];
+                                      hands[(winPlayerId + 1) % MAX_PLAYER] = work;
+                                  }
+                                  hands.unshift(hands.pop());
+                                  if (winPlayerId >= 0) {
+                                      work = hands[winPlayerId];
+                                      hands[winPlayerId] = hands[(winPlayerId + 1) % MAX_PLAYER];
+                                      hands[(winPlayerId + 1) % MAX_PLAYER] = work;
+                                  }
+                                  break;
+                        case 2  : alert("出目 : 左1(手札を左隣りに1つ移動。)");
+                                  hands.push(hands.shift());
+                                  if (winPlayerId >= 0) {
+                                      work = hands[winPlayerId];
+                                      hands[winPlayerId] = hands[(winPlayerId + 3) % MAX_PLAYER];
+                                      hands[(winPlayerId + 3) % MAX_PLAYER] = work;
+                                  }
+                                  break;
+                        case 3  : alert("出目 : 左2(手札を左隣りに2つ移動。)");
+                                  hands.push(hands.shift());
+                                  if (winPlayerId >= 0) {
+                                      work = hands[winPlayerId];
+                                      hands[winPlayerId] = hands[(winPlayerId + 3) % MAX_PLAYER];
+                                      hands[(winPlayerId + 3) % MAX_PLAYER] = work;
+                                  }
+                                  hands.push(hands.shift());
+                                  if (winPlayerId >= 0) {
+                                      work = hands[winPlayerId];
+                                      hands[winPlayerId] = hands[(winPlayerId + 3) % MAX_PLAYER];
+                                      hands[(winPlayerId + 3) % MAX_PLAYER] = work;
+                                  }
+                                  break;
+                        case 4  : alert("出目 : ×(シャッフル発動失敗)");
+                                  break;
+                        case 5  : alert("出目 : ×(シャッフル発動失敗)");
+                                  break;
+                        default : alert("shuffleTime kind=" + kind);
+                                  break;
+                    }
+                    
+                    // 手札シャッフル処理を呼び出す。
+                    for (let playerId = 0; playerId < MAX_PLAYER; playerId++) {
+                        if (players[playerId].strWin == "") {
+                            hands[playerId].shuffle();
+                        }
+                    }
+                    
+                    // 手札表示処理を呼び出す。
+                    game.outputHandP();
+                    
+                    // カード選択イベント設定処理を呼び出す。
+                    game.setSelectCardEvt();
+                    return;
+                };
+                
+                // シャッフルタイム処理
+                this.shuffleTime = function() {
+                    let work = "シャッフル発動！！";
+                    alert(work);
+                    
+                    // サイコロを振ってシャッフル方法を決める。
+                    let random = Math.floor(Math.random() * MAX_SHUFFLE);
+                    //alert("出目 : " + random);
+                    
+                    // シャッフルタイム実処理を呼び出す。
+                    this.shuffleTimeCore(random);
+                    //this.shuffleTimeCore(1);
+                    
+                    // シャッフルタイム使用フラグをONにする。
+                    players[cntTurn].shuffle = true;
+                    
+                    // シャッフルボタン表示切替処理を呼び出す。
+                    this.changesShuffleButton();
+                    return;
+                };
+                
+                // 対象プレイヤー情報取得処理
+                this.getTargetPlayer = function() {
+                    // 引くプレイヤーと引かれるプレイヤーを調べる。
+                    let toPlayer = cntTurn;
+                    let fromPlayer = (cntTurn + 1) % MAX_PLAYER;
+                    while(1) {
+                        if ((toPlayer != fromPlayer) && (players[fromPlayer].strWin == "")) {
+                            break;
+                        }
+                        fromPlayer = (fromPlayer + 1) % MAX_PLAYER;
+                    }
+                    let result = [];
+                    result["from"] = fromPlayer;
+                    result["to"] = toPlayer;
+                    return result;
+                };
+                
+                // カード選択共通処理
+                this.selectCardCommon = function(fromPlayer, toPlayer, intPlayer, intIdx) {
+                    if (fromPlayer != intPlayer) {
+                        // カードを引く先が間違っている場合
+                        let work = "プレイヤー" + zeroPadding(toPlayer + 1) + "の手番です。";
+                        work += "プレイヤー" + zeroPadding(fromPlayer + 1) + "のカードを引いてください。";
+                        alert(work);
+                    } else {
+                        // カードを引く先が正しい場合
+                        
+                        // 指定手札取得処理を呼び出す。
+                        let card = hands[fromPlayer].getTarget(intIdx);
+                        //alert("fromPlayer:" + fromPlayer + "  intIdx:" + intIdx + "  mark:" + card.mark + "  num:" + card.num);
+                        
+                        // 手札セット処理を呼び出す。
+                        hands[toPlayer].set(card);
+                        
+                        // 手札整理処理を呼び出す。
+                        hands[toPlayer].checkPairAll();
+                        
+                        // 手札シャッフル処理を呼び出す。
+                        hands[toPlayer].shuffle();
+                        
+                        // 手札表示処理を呼び出す。
+                        game.outputHandP();
+                        
+                        // カード選択イベント設定処理を呼び出す。
+                        game.setSelectCardEvt();
+                        
+                        // ターン変更処理を呼び出す。
+                        game.changeTurn();
+                    }
+                    return;
+                };
+                
+                // カード選択イベント処理
+                this.selectCardUser = function(event) {
+                    // クリックしたカードが妥当かどうかによって処理を分岐する。
+                    if (players[cntTurn].cpu == true) {
+                        // 手番がCPUである場合
+                        let work = "プレイヤー" + zeroPadding(cntTurn + 1) + "(CPU)の手番です。";
+                        work += "カード選択はできません。";
+                        alert(work);
+                    } else {
+                        // 対象プレイヤー情報取得処理を呼び出す。
+                        let result = game.getTargetPlayer();
+                        
+                        // イベント情報からクリックしたカードを特定する。
+                        let name = event.target.getAttribute("name").split("_");
+                        let intPlayer = parseInt(name[0], 10);
+                        let intIdx = parseInt(name[1], 10);
+                        
+                        // カード選択共通処理を呼び出す。
+                        game.selectCardCommon(result["from"], result["to"], intPlayer, intIdx);
+                    }
+                    return;
+                };
+                
+                // カード自動選択処理
+                this.selectCardCpu = function() {
+                    // 対象プレイヤー情報取得処理を呼び出す。
+                    let result = this.getTargetPlayer();
+                    
+                    // 引くカードを決める。
+                    let handInfo = hands[result["from"]].getAll();
+                    let random = Math.floor(Math.random() * handInfo.hand.length);
+                    let intPlayer = result["from"];
+                    let intIdx = random;
+                    //alert("intPlayer + "、" + intIdx);
+                    //let work = "プレイヤー" + zeroPadding(result["to"] + 1) + "が、";
+                    //work += "プレイヤー" + zeroPadding(result["from"] + 1) + "のカードを引きます。";
+                    //alert(work);
+                    
+                    // カード選択共通処理を呼び出す。
+                    this.selectCardCommon(result["from"], result["to"], intPlayer, intIdx);
+                    return;
+                };
+                
+                // カード選択イベント設定共通処理
+                this.setSelectCardEvtCommon = function(playerId, handInfo) {
+                    // 各カードにイベントを設定する。
+                    for (let loop = 0; loop < handInfo.hand.length; loop++) {
+                        let work = document.getElementsByName(String(playerId) + "_" + String(loop));
+                        work[0].addEventListener("click", this.selectCardUser);
+                    }
+                    return;
+                };
+                
+                // カード選択イベント設定処理
+                this.setSelectCardEvt = function() {
+                    for (let loop = 0; loop < MAX_PLAYER; loop++) {
+                        // 各プレーヤーごとにカード選択イベント設定共通処理を呼び出す。
+                        let handInfo = hands[loop].getAll();
+                        this.setSelectCardEvtCommon(loop, handInfo);
+                    }
+                    return;
+                };
+                
+                // シャッフルボタン表示切替処理
+                this.changesShuffleButton = function() {
+                    // シャッフルボタンを活性に変更する。
+                    document.getElementById("shuffle").disabled = false;
+                    
+                    if (cntWin >= 3) {
+                        // 残りのプレイヤーが2人以下の場合
+                        
+                        // シャッフルボタンを非活性に変更する。
+                        document.getElementById("shuffle").disabled = true;
+                    }
+                    if (players[0].shuffle != false) {
+                        // プレイヤー01がシャッフルタイム使用済の場合
+                        
+                        // シャッフルボタンを非活性に変更する。
+                        document.getElementById("shuffle").disabled = true;
+                    }
+                    
+                    // ジョーカー探索処理を呼び出す。
+                    let info = this.searchJoker();
+                    //alert("fin playerId:" + info["id"] + "  index:" + info["index"]);
+                    if (info["id"] != 0) {
+                        // プレイヤー01がジョーカーを保持していない場合
+                        
+                        // シャッフルボタンを非活性に変更する。
+                        document.getElementById("shuffle").disabled = true;
+                    }
+                    return;
+                };
+                
+                // ゲーム開始処理
+                this.start = function() {
+                    // 初期化処理を呼び出す。
+                    this.init();
+                    
+                    // 開始ボタンを非活性に変更する。
+                    document.getElementById("start").disabled = true;
+                    
+                    // デッキ作成処理を呼び出す。
+                    deck.make();
+                    
+                    // 作成したデッキをシャッフルする。
+                    deck.shuffle();
+                    
+                    // 手札配布処理を呼び出す。
+                    this.distribute();
+                    
+                    // 各プレーヤーごとに手札全整理処理を呼び出す。
+                    for (let loop = 0; loop < MAX_PLAYER; loop++) {
+                        hands[loop].checkPairAll();
+                    }
+                    
+                    // 手札表示処理を呼び出す。
+                    this.outputHandP();
+                    
+                    // カード選択イベント設定処理
+                    this.setSelectCardEvt();
+                    
+                    // 手番表示処理を呼び出す。
+                    this.outputTurn();
+                    
+                    // シャッフルボタン表示切替処理を呼び出す。
+                    this.changesShuffleButton();
+                    return;
+                };
+                
+                // ターン変更処理
+                this.changeTurn = function() {
+                    // ゲーム終了判定処理を呼び出す。
+                    result = game.isFin();
+                    if (result == true) {
+                        // ゲーム終了処理を呼び出す。
+                        game.fin();
+                    } else {
+                        // ターンを切り替える。
+                        cntTurn = (cntTurn + 1) % MAX_PLAYER;
+                        while(1) {
+                            if (players[cntTurn].strWin == "") {
+                                break;
+                            }
+                            cntTurn = (cntTurn + 1) % MAX_PLAYER;
+                        }
+                        
+                        // 手札表示処理を呼び出す。
+                        this.outputHandP();
+                        
+                        // カード選択イベント設定処理
+                        this.setSelectCardEvt();
+                        
+                        // 手番表示処理を呼び出す。
+                        this.outputTurn();
+                        
+                        // 手番によって処理を分岐する。
+                        if (players[cntTurn].cpu == true) {
+                            // 手番がCPUである場合
+                            
+                            // 次へボタンを活性に変更する。
+                            document.getElementById("next").disabled = false;
+                            
+                            let info = this.searchJoker();
+                            if (info["id"] != 0) {
+                                // プレイヤー01がジョーカーを保持していない場合
+                                // 自動でターンを進める。
+                                game.next();
+                            } else {
+                                // プレイヤー01がジョーカーを保持している場合
+                                // ユーザの次へボタン操作イベント待ち。
+                            }
+                        } else {
+                            // 手番がユーザである場合
+                            
+                            // 次へボタンを非活性に変更する。
+                            document.getElementById("next").disabled = true;
+                            
+                            // ユーザのカード選択イベント待ち。
+                        }
+                        
+                        // シャッフルボタン表示切替処理を呼び出す。
+                        this.changesShuffleButton();
+                    }
+                    return;
+                };
+                
+                // ターン進行処理
+                this.next = function() {
+                    // ジョーカー探索処理を呼び出す。
+                    let info = this.searchJoker();
+                    //alert("fin playerId:" + info["id"] + "  index:" + info["index"]);
+                    if (info["id"] != 0) {
+                        // プレイヤー01がジョーカーを保持していない場合
+                        
+                        if (players[info["id"]].shuffle != true) {
+                            // シャッフルタイム未使用である場合
+                            
+                            if (cntWin == 2) {
+                                // 残りのプレイヤーが3人の場合
+                                
+                                // シャッフルタイム処理を呼び出す。
+                                this.shuffleTime();
+                            }
+                        }
+                    }
+                    
+                    // カード自動選択処理を呼び出す。
+                    this.selectCardCpu();
+                    return;
+                };
+                
+                // 結果表示処理
+                this.outputResult = function() {
+                    let work = "";
+                    for (let loop = 0; loop < MAX_PLAYER; loop++) {
+                        if (loop == 0) {
+                            work += "<p id='result' style='color:red'>";
+                        } else {
+                            work += "<p id='result' style='color:black'>";
+                        }
+                        work += "プレイヤー" + String(zeroPadding(loop + 1)) + "：";
+                        work += "1位 " + String(spacePadding(players[loop].results["win1"])) + "回";
+                        work += "　2位 " + String(spacePadding(players[loop].results["win2"])) + "回";
+                        work += "　3位 " + String(spacePadding(players[loop].results["win3"])) + "回";
+                        work += "　4位 " + String(spacePadding(players[loop].results["lose"])) + "回";
+                        let total = 0;
+                        total += parseInt(String(spacePadding(players[loop].results["win1"])));
+                        total += parseInt(String(spacePadding(players[loop].results["win2"])));
+                        total += parseInt(String(spacePadding(players[loop].results["win3"])));
+                        let win = total;
+                        total += parseInt(String(spacePadding(players[loop].results["lose"])));
+                        let par = "---";
+                        if (total != 0) {
+                            par = win / total * 100.00;
+                            par = par.toFixed(3);
+                        }
+                        work += "　勝率 " + par + "%" + "<br>";
+                    }
+                    work += "</p>";
+                    document.getElementById("result").innerHTML = work;
+                    return;
+                };
+                
+                // 手番表示処理
+                this.outputTurn = function() {
+                    let work =  "<span>";
+                    work += "プレイヤー" + zeroPadding(cntTurn + 1) + "の手番　　";
+                    work += "</span>";
+                    document.getElementById("turn").innerHTML = work;
+                    return;
+                };
+                
+                // ボタン表示処理
+                this.outputButton = function() {
+                    let work =  "<span>";
+                    work += "<input type='button' id='start' value='開始' onclick='game.start()'>";
+                    work += "<input type='button' id='next' value='次へ' disabled=true onclick='game.next()'>";
+                    work += "<input type='button' id='shuffle' value='シャッフル' disabled=true onclick='game.shuffleTime()'>";
+                    work += "</span>";
+                    document.getElementById("button").innerHTML = work;
+                    return;
+                };
+            }
+            
+            // 初期化処理を呼び出す。
+            let game = new OldMaid();
+            game.init();
+            
+            // ボタン表示処理を呼び出す。
+            game.outputButton();
+            
+            // 結果表示処理を呼び出す。
+            game.outputResult();
+        </script>
+    </body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html  lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<title>古町ガチャ！</title>
+	</head>
+	<body>
+	
+<!--ガチャ用スタイルここから-->
+<style type="text/css">
+.modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: none;
+  z-index: 9999;
+  height: 100%;
+  width: 100%; 
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-btn{
+  float:left;
+  margin:0 50px;
+  height:auto;
+  text-align:center;
+}
+
+.modal-header {
+  border-bottom: 1px solid #e4e4e4;
+  padding: 3px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-body {
+  padding:  20px;
+  color: black;
+}
+
+.modal-content {
+  background-color: #f4f4f4;
+  border-radius: 30px;
+  margin: 10% auto;
+  width: 50%;
+}
+
+.clear{
+  clear:left;
+}
+
+#playGif {
+  width: 100%;
+  height: auto;
+  margin: auto;
+}
+</style>
+<!--ガチャ用スタイルここまで-->
+
+<!--カプセル排出のモーダルウィンドウここから-->
+<div id="gachaModal" class="modal">
+	<div class="modal-content">
+		<div class="modal-header">
+			<h3>学芸本ガチャ!　</h3>
+			<h2 id="gachaTitleTxt"></h2>
+		</div>
+		<div class="modal-body">
+			<img id="playGif" src="" alt="抽選のアニメーション" style="display: block; margin: auto;">
+			<p>アニメーション終了後、当たった本の蔵書検索詳細画面に遷移します。
+                           タイトルの下の「電子資料を表示」をクリックしてください。</p>
+			<button class="js-result">結果だけ見る</button>
+			
+		</div>
+	</div>
+</div>
+<!--カプセル排出のモーダルウィンドウここまで-->
+
+<!--☆☆☆ガチャガチャNo.0の設置ここから：choiceGachaBox(0)←ここの数字でガチャガチャを選択☆☆☆-->
+<div class="modal-btn" onclick="choiceGachaBox(0)" style="cursor: pointer;">
+	<img loading="lazy" src="image1.png" width="250" height="400" alt="論文・レポートのガチャ">
+	<p >論文やレポートの書き方に<br>
+	関する本が入っています。</p>
+</div>
+<!--☆☆☆ガチャガチャNo.0の設置ここまで：choiceGachaBox(0)←ここの数字でガチャガチャを選択☆☆☆-->
+
+<!--この下に新規のガチャガチャを追加-->
+
+<div class="clear"></div>
+
+<!--ガチャ用スクリプトここから-->
+<script type="text/javascript">
+
+/* ☆☆☆ガチャ結果リスト☆☆☆ */
+const GachaList = [
+//ガチャガチャNo.0の結果リスト
+	[
+	"https://OPACリンク1",
+	"https://OPACリンク2",
+	"https://OPACリンク3"
+	],
+//この上に結果リストを追加していく
+];
+
+/* ☆☆☆ガチャタイトル(ガチャリストと順番をそろえること)☆☆☆ */
+//モーダルのタイトル部分に表示されます
+const GachaTitleList = [
+	"論文・レポート"
+//この上に追加していく
+];
+
+/* ☆☆☆gif画像(ガチャ排出アニメーションのURLを指定する)☆☆☆ */
+const gifs = [
+	'animeRed.gif'
+];
+
+
+
+//モーダル関係 ※ここから下は編集しない
+document.addEventListener('DOMContentLoaded', (event) => {
+	let GachaNum = 0;//ガチャ番号を保存する変数
+	let timer;//ガチャ結果に遷移するタイマーを保存する変数
+	
+	const jsModal = document.getElementById('gachaModal');
+	const jamp = document.querySelector('.js-result');
+	const gachaTitle = document.getElementById('gachaTitleTxt');
+        const selectedGif = document.getElementById("playGif");
+
+	//ガチャを抽選する関数
+	function Gacha(tempNum) {
+		var k = Math.floor(Math.random() * GachaList[tempNum].length);
+		return GachaList[tempNum][k];
+	}
+
+	//ランダムなgifを再生する関数
+	function randomGif() {
+		var j = Math.floor(Math.random() * gifs.length);
+		selectedGif.src = gifs[j] + '?t=' + new Date().getTime();//初めから再生されるようにtimeをつける
+	}
+
+	//ガチャがクリックされた時
+	window.choiceGachaBox = function(tempNum) {
+		GachaNum = tempNum;
+		gachaTitle.textContent = `${GachaTitleList[GachaNum]}`;
+		randomGif();
+		timer = setTimeout(function() {
+			window.location.href = Gacha(GachaNum);//ガチャ排出
+			clearTimeout(timer);//タイマーリセット
+		}, 8.5*1000);//ガチャ結果へ9秒後に遷移
+		jsModal.style.display = 'block';//モーダル表示
+	};
+
+	//「結果だけ見る」ボタンがクリックされた時
+	jamp.addEventListener('click', result);
+	function result() {
+		window.location.href = Gacha(GachaNum);//ガチャ排出
+		clearTimeout(timer);//タイマーリセット
+	}
+
+	//モーダルコンテンツ以外がクリックされた時→モーダルウィンドウを閉じる
+	window.addEventListener('click', outsideClose);
+	function outsideClose(event){
+		if (event.target === jsModal) {
+			clearTimeout(timer);//タイマーリセット
+			jsModal.style.display = 'none';//モーダル非表示
+		}
+	}
+	
+	//戻る・進むボタン対応
+	window.addEventListener('pageshow', pageShow);
+	function pageShow(event){
+		jsModal.style.display = 'none';//モーダル非表示
+		if (event.persisted) { //戻る・進むボタンのとき
+			window.location.reload();//キャッシュ対応のための強制リロード
+		}
+	}
+	
+});
+</script>
+<!--ガチャ用スクリプトここまで-->
+
+	</body>
+</html>
