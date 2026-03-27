@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ガチャ - 古町ガチャ</title>
     <link rel="stylesheet" href="css/retro.css">
+    <link rel="stylesheet" href="css/gacha_animation.css">
     <style>
         /* ガチャ特有のスタイル */
         .gacha-container {
@@ -143,11 +144,41 @@
             <a href="coupons.html" class="retro-btn btn-warning">🎟️ クーポンを確認</a>
         </div>
 
-        <button class="gacha-btn" id="gachaBtn">
-            <span>🎰</span>
-            <span>ガチャを</span>
-            <span>回す！</span>
-        </button>
+        <div class="gacha-animation-wrapper">
+            <div id="machine-container" class="machine-container">
+                <!-- マシーン本体 -->
+                <img class="machine-body" src="../images/gacha/gacha-base.png" alt="ガチャ本体">
+                <!-- ハンドル -->
+                <img class="machine-handle" src="../images/gacha/gacha-handle.png" id="gachaHandle" alt="ハンドル">
+                
+                <!-- カプセル排出エリア -->
+                <div id="dispense-area">
+                    <img class="capsule hidden" src="../images/gacha/capsule-red.png" id="fallingCapsule" alt="カプセル">
+                </div>
+                
+                <!-- 誘導テキスト -->
+                <div id="instructionText" class="instruction-text">ハンドルを回してガチャ！</div>
+            </div>
+        </div>
+
+        <!-- 演出オーバーレイ -->
+        <div id="gachaOverlay" class="gacha-overlay">
+            <div class="zoom-container" id="zoomContainer">
+                <img class="capsule-zoom" src="../images/gacha/capsule-red.png" id="zoomCapsule" alt="カプセル">
+                <img class="capsule-open hidden" src="../images/gacha/capsule-red-open.png" id="openCapsule" alt="開いたカプセル">
+            </div>
+            
+            <div id="gachaResultDisplay" class="result-display hidden">
+                <div class="shop-name" id="resultShopName"></div>
+                <img class="shop-image-zoom" id="resultShopImage" src="" alt="店舗画像">
+                <div style="margin-bottom: 15px;">
+                    <a class="retro-btn btn-success" id="resultMapBtn" href="#" target="_blank">📍 地図を見る</a>
+                </div>
+                <div>
+                    <button class="retro-btn btn-primary" id="closeOverlayBtn">結果を閉じる</button>
+                </div>
+            </div>
+        </div>
 
         <!-- 結果表示エリア -->
         <div class="retro-card result-card" id="resultCard">
@@ -190,44 +221,116 @@
             window.location.href = 'login.html';
         });
 
-        // ----- ガチャを回す -----
-        document.getElementById('gachaBtn').addEventListener('click', async function() {
-            const btn = this;
-            btn.classList.add('spinning');
+        // ----- ガチャの演出とロジック -----
+        const handle = document.getElementById('gachaHandle');
+        const machine = document.getElementById('machine-container');
+        const fallingCapsule = document.getElementById('fallingCapsule');
+        const overlay = document.getElementById('gachaOverlay');
+        const zoomCapsule = document.getElementById('zoomCapsule');
+        const openCapsule = document.getElementById('openCapsule');
+        const instruction = document.getElementById('instructionText');
+        const resultDisplay = document.getElementById('gachaResultDisplay');
+        const closeOverlayBtn = document.getElementById('closeOverlayBtn');
+
+        let isPlaying = false;
+
+        handle.addEventListener('click', async function() {
+            if (isPlaying) return;
 
             try {
+                // 1. まずAPIを叩いて結果を確定させる（コイン不足などのチェックも兼ねる）
                 const res = await fetch('/api/gacha.php');
                 const data = await res.json();
 
-                if (data.success) {
-                    const shop = data.shop;
-
-                    // 結果を表示
-                    document.getElementById('shopName').textContent = shop.name;
-                    document.getElementById('shopGenre').textContent = shop.genre;
-                    document.getElementById('shopDesc').textContent = shop.description;
-                    document.getElementById('shopAddress').textContent = '📍 ' + shop.address;
-
-                    // 画像
-                    const imgContainer = document.getElementById('shopImage');
-                    imgContainer.innerHTML = '<img src="/' + shop.image + '" alt="' + shop.name + '" onerror="this.parentElement.innerHTML=\'<span>画像準備中</span>\'">';
-
-                    // Google Map リンク
-                    const mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(shop.address);
-                    document.getElementById('mapBtn').href = mapUrl;
-
-                    // カード表示
-                    const card = document.getElementById('resultCard');
-                    card.classList.remove('show');
-                    setTimeout(() => card.classList.add('show'), 100);
-                } else {
+                if (!data.success) {
                     alert(data.message);
+                    return;
                 }
-            } catch (err) {
-                alert('通信エラーが発生しました');
-            }
 
-            setTimeout(() => btn.classList.remove('spinning'), 500);
+                // 2. 演出開始
+                isPlaying = true;
+                const shop = data.shop;
+
+                // コイン表示を更新（暫定的にマイナス100とするか、再度checkLoginを呼ぶ）
+                checkLogin();
+
+                // 準備
+                instruction.classList.add('hidden');
+                handle.classList.add('anim-turn-handle');
+                machine.classList.add('anim-shake-machine');
+
+                // カプセル色のランダム化（演出上の遊び）
+                const isBlue = Math.random() > 0.5;
+                const capsuleSrc = isBlue ? '../images/gacha/capsule-blue.png' : '../images/gacha/capsule-red.png';
+                const capsuleOpenSrc = isBlue ? '../images/gacha/capsule-blue-open.png' : '../images/gacha/capsule-red-open.png';
+                
+                fallingCapsule.src = capsuleSrc;
+                zoomCapsule.src = capsuleSrc;
+                openCapsule.src = capsuleOpenSrc;
+
+                // 3. カプセル排出
+                setTimeout(() => {
+                    fallingCapsule.classList.remove('hidden');
+                    fallingCapsule.classList.add('anim-drop-capsule');
+                }, 800);
+
+                // 4. オーバーレイ表示
+                setTimeout(() => {
+                    machine.classList.remove('anim-shake-machine');
+                    overlay.classList.add('visible');
+                    zoomCapsule.classList.remove('hidden');
+                    zoomCapsule.classList.add('anim-shake-zoom');
+                }, 2200);
+
+                // 5. カプセルオープン & 結果表示
+                setTimeout(() => {
+                    zoomCapsule.classList.add('anim-scale-out');
+                    
+                    setTimeout(() => {
+                        zoomCapsule.classList.add('hidden');
+                        zoomCapsule.classList.remove('anim-shake-zoom', 'anim-scale-out');
+                        
+                        openCapsule.classList.remove('hidden');
+                        openCapsule.classList.add('anim-pop-in');
+
+                        // 結果詳細をセット
+                        document.getElementById('resultShopName').textContent = shop.name;
+                        document.getElementById('resultShopImage').src = '/' + shop.image;
+                        const mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(shop.address);
+                        document.getElementById('resultMapBtn').href = mapUrl;
+
+                        resultDisplay.classList.remove('hidden');
+                        resultDisplay.classList.add('anim-pop-in');
+
+                        // 下の結果カードも更新しておく
+                        document.getElementById('shopName').textContent = shop.name;
+                        document.getElementById('shopGenre').textContent = shop.genre;
+                        document.getElementById('shopDesc').textContent = shop.description;
+                        document.getElementById('shopAddress').textContent = '📍 ' + shop.address;
+                        document.getElementById('shopImage').innerHTML = '<img src="/' + shop.image + '" alt="' + shop.name + '">';
+                        document.getElementById('mapBtn').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(shop.address);
+                        document.getElementById('resultCard').classList.add('show');
+
+                    }, 300);
+                }, 4000);
+
+            } catch (err) {
+                console.error(err);
+                alert('通信エラーが発生しました');
+                isPlaying = false;
+            }
+        });
+
+        // 演出を閉じる
+        closeOverlayBtn.addEventListener('click', () => {
+            overlay.classList.remove('visible');
+            resultDisplay.classList.add('hidden');
+            openCapsule.classList.add('hidden');
+            handle.classList.remove('anim-turn-handle');
+            fallingCapsule.classList.add('hidden');
+            fallingCapsule.classList.remove('anim-drop-capsule');
+            instruction.classList.remove('hidden');
+            isPlaying = false;
         });
     </script>
 </body>
