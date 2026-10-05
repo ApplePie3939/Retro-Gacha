@@ -197,12 +197,13 @@
         </div>
     </div>
 
+    <script src="../js/config.js"></script>
+    <script src="../js/api-client.js"></script>
     <script>
         // ----- ログイン状態チェック -----
         async function checkLogin() {
             try {
-                const res = await fetch('/api/user.php');
-                const data = await res.json();
+                const data = await RetroGachaAPI.getUser();
                 if (!data.logged_in) {
                     window.location.href = 'login.html';
                     return;
@@ -217,7 +218,7 @@
 
         // ----- ログアウト -----
         document.getElementById('logoutBtn').addEventListener('click', async function() {
-            await fetch('/api/logout.php');
+            await RetroGachaAPI.logout();
             window.location.href = 'login.html';
         });
 
@@ -239,8 +240,7 @@
 
             try {
                 // 1. まずAPIを叩いて結果を確定させる（コイン不足などのチェックも兼ねる）
-                const res = await fetch('/api/gacha.php');
-                const data = await res.json();
+                const data = await RetroGachaAPI.drawGacha();
 
                 if (!data.success) {
                     alert(data.message);
@@ -295,7 +295,7 @@
 
                         // 結果詳細をセット
                         document.getElementById('resultShopName').textContent = shop.name;
-                        document.getElementById('resultShopImage').src = '/' + shop.image;
+                        document.getElementById('resultShopImage').src = RetroGachaAPI.assetUrl(shop.image);
                         const mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(shop.address);
                         document.getElementById('resultMapBtn').href = mapUrl;
 
@@ -307,7 +307,10 @@
                         document.getElementById('shopGenre').textContent = shop.genre;
                         document.getElementById('shopDesc').textContent = shop.description;
                         document.getElementById('shopAddress').textContent = '📍 ' + shop.address;
-                        document.getElementById('shopImage').innerHTML = '<img src="/' + shop.image + '" alt="' + shop.name + '">';
+                        const shopImage = document.createElement('img');
+                        shopImage.src = RetroGachaAPI.assetUrl(shop.image);
+                        shopImage.alt = shop.name;
+                        document.getElementById('shopImage').replaceChildren(shopImage);
                         document.getElementById('mapBtn').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(shop.address);
                         document.getElementById('resultCard').classList.add('show');
 

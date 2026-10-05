@@ -104,12 +104,13 @@
         <div id="result-message"></div>
     </div>
 
+    <script src="../js/config.js"></script>
+    <script src="../js/api-client.js"></script>
     <script>
         // ログインチェックとコイン取得
         async function fetchUserData() {
             try {
-                const res = await fetch('/api/user.php');
-                const data = await res.json();
+                const data = await RetroGachaAPI.getUser();
                 if (!data.logged_in) {
                     window.location.href = 'login.html';
                     return;
@@ -127,7 +128,10 @@
             { 
                 fps: 10, 
                 qrbox: {width: 250, height: 250},
-                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                supportedScanTypes: [
+                    Html5QrcodeScanType.SCAN_TYPE_CAMERA,
+                    Html5QrcodeScanType.SCAN_TYPE_FILE
+                ]
             },
             /* verbose= */ false);
 
@@ -138,7 +142,7 @@
             isScanning = false; // 一度スキャンしたら連続送信を防ぐ
             
             // html5-qrcodeのスキャンを一時停止
-            html5QrcodeScanner.pause();
+            try { html5QrcodeScanner.pause(); } catch (error) { /* ファイル読み取り時は停止不要 */ }
 
             let shopId = null;
 
@@ -164,19 +168,14 @@
                 setTimeout(() => {
                     msgDiv.style.display = 'none';
                     isScanning = true;
-                    html5QrcodeScanner.resume();
+                    try { html5QrcodeScanner.resume(); } catch (error) { /* ファイル読み取り時は再開不要 */ }
                 }, 3000);
                 return;
             }
 
             // APIに送信
             try {
-                const res = await fetch('/api/scan_qr.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ shop_id: shopId })
-                });
-                const data = await res.json();
+                const data = await RetroGachaAPI.scanShop(shopId);
 
                 if (data.success) {
                     msgDiv.className = 'success';
@@ -187,7 +186,7 @@
                     setTimeout(() => {
                         msgDiv.style.display = 'none';
                         isScanning = true;
-                        html5QrcodeScanner.resume();
+                        try { html5QrcodeScanner.resume(); } catch (error) { /* ファイル読み取り時は再開不要 */ }
                     }, 5000);
                 } else {
                     msgDiv.className = 'error';
@@ -196,7 +195,7 @@
                     setTimeout(() => {
                         msgDiv.style.display = 'none';
                         isScanning = true;
-                        html5QrcodeScanner.resume();
+                        try { html5QrcodeScanner.resume(); } catch (error) { /* ファイル読み取り時は再開不要 */ }
                     }, 3000);
                 }
             } catch (err) {
@@ -205,7 +204,7 @@
                 setTimeout(() => {
                     msgDiv.style.display = 'none';
                     isScanning = true;
-                    html5QrcodeScanner.resume();
+                    try { html5QrcodeScanner.resume(); } catch (error) { /* ファイル読み取り時は再開不要 */ }
                 }, 3000);
             }
         }

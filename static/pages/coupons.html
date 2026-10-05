@@ -81,13 +81,14 @@
         </div>
     </div>
 
+    <script src="../js/config.js"></script>
+    <script src="../js/api-client.js"></script>
     <script>
         let currentUserCoins = 0;
 
         async function init() {
             try {
-                const res = await fetch('/api/user.php');
-                const data = await res.json();
+                const data = await RetroGachaAPI.getUser();
                 if (!data.logged_in) {
                     window.location.href = 'login.html';
                     return;
@@ -108,8 +109,7 @@
 
         async function loadAvailableCoupons() {
             try {
-                const res = await fetch('/api/coupons.php');
-                const data = await res.json();
+                const data = await RetroGachaAPI.getCoupons();
                 const container = document.getElementById('availableCoupons');
                 container.innerHTML = '';
 
@@ -144,8 +144,7 @@
 
         async function loadMyCoupons() {
             try {
-                const res = await fetch('/api/my_coupons.php');
-                const data = await res.json();
+                const data = await RetroGachaAPI.getMyCoupons();
                 const container = document.getElementById('myCoupons');
                 container.innerHTML = '';
 
@@ -181,12 +180,7 @@
             }
 
             try {
-                const res = await fetch('/api/buy_coupon.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ coupon_id: couponId })
-                });
-                const data = await res.json();
+                const data = await RetroGachaAPI.buyCoupon(couponId);
 
                 if (data.success) {
                     alert(data.message);

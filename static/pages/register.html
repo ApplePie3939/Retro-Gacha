@@ -34,6 +34,8 @@
         </div>
     </div>
 
+    <script src="../js/config.js"></script>
+    <script src="../js/api-client.js"></script>
     <script>
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -44,13 +46,7 @@
             const password = document.getElementById('password').value;
 
             try {
-                // APIへのパスに注意（../を忘れずに）
-                const res = await fetch('../api/register.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
+                const data = await RetroGachaAPI.register(username, password);
 
                 if (data.success) {
                     msgEl.className = 'message success';

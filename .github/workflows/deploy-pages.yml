@@ -1,0 +1,57 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Test demo data flow
+        run: node --test tests/demo-api.test.cjs
+
+      - name: Build static artifact
+        shell: bash
+        run: |
+          mkdir -p _site
+          cp static/index.html _site/index.html
+          cp -R static/pages static/images static/js _site/
+          cp deploy/pages-config.js _site/js/config.js
+          touch _site/.nojekyll
+
+      - name: Verify private server files are excluded
+        shell: bash
+        run: |
+          test ! -e _site/api
+          test ! -e _site/db
+          test ! -e _site/includes
+          test ! -e _site/init_db.php
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

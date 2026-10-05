@@ -5,12 +5,23 @@
 新潟市古町エリアの商店街を舞台にした、店舗発見・回遊促進アプリのプロトタイプです。
 ガチャで目的地を決め、実際に店舗を訪れてQRコードをスキャンすることでコインを貯め、お得なクーポンと交換できる体験を提供します。
 
+## 🌐 GitHub Pages版
+
+公開URL: https://applepie3939.github.io/Retro-Gacha/
+
+GitHub Pages版では、登録したユーザー、コイン、訪問履歴、所持クーポンをブラウザの `localStorage` に保存します。データは利用中のブラウザ内だけに保存され、別の端末やブラウザとは共有されません。データをリセットする場合は、ブラウザのサイトデータから `applepie3939.github.io` のローカルストレージを削除してください。
+
+初回公開時は、GitHubのリポジトリで `Settings` → `Pages` → `Build and deployment` → `Source` を **GitHub Actions** に設定してください。以降は `main` ブランチへのpushで自動更新されます。
+
+> GitHub Pages版のアカウント機能は体験用です。入力したパスワードもブラウザ内に保存されるため、普段利用しているパスワードは使用しないでください。
+
 ## 📂 ディレクトリ構成
 
 ```
 static/
-├── css/
-│   └── retro.css          # 全体共通のレトロデザインテーマ
+├── js/
+│   ├── config.js          # ローカルPHP版の設定
+│   └── api-client.js      # PHP／Pagesデモ共通のAPI層
 ├── images/
 │   ├── qrcodes/           # 店舗ごとのQRコード画像
 │   ├── shop_images/       # 店舗紹介用の画像
@@ -77,6 +88,8 @@ Backend: PHP 7.4+
 Database: SQLite3
 
 Tools: ngrok (外部公開), QR Code API (QR生成)
+
+Deployment: GitHub Actions, GitHub Pages
 
 ## ⚠️ 注意事項
 
